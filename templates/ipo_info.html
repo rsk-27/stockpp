@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPO Info - Stock Market Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .ipo-info-container {
+            max-width: 1000px;
+            margin: 3rem auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(76, 175, 80, 0.13);
+            padding: 2.5rem 2rem;
+            animation: fadeIn 1s cubic-bezier(.77,0,.18,1);
+        }
+        .ipo-info-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+        .ipo-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+        .ipo-table th, .ipo-table td {
+            border: 1px solid #e0e0e0;
+            padding: 0.8rem 0.5rem;
+            text-align: left;
+        }
+        .ipo-table th {
+            background: #f8f9fa;
+            color: #4CAF50;
+            font-weight: 700;
+        }
+        .ipo-table tr:hover {
+            background: #e8f5e9;
+        }
+        .ipo-loader {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        .ipo-error {
+            color: #ff4444;
+            text-align: center;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="ipo-info-container">
+        <div class="ipo-info-title"><i class="fas fa-building-columns"></i> IPO Information</div>
+        <div id="ipo-loader" class="ipo-loader" style="display:none;">
+            <i class="fas fa-spinner fa-spin" style="font-size:2rem;color:#4CAF50;"></i>
+        </div>
+        <div id="ipo-error" class="ipo-error" style="display:none;"></div>
+        <table class="ipo-table" id="ipo-table" style="display:none;">
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Open Date</th>
+                    <th>Close Date</th>
+                    <th>Price Band</th>
+                    <th>Lot Size</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="ipo-table-body"></tbody>
+        </table>
+    </div>
+    <script>
+    // Fetch IPO data from ipoapi.in
+    function fetchIPOInfo() {
+        document.getElementById('ipo-loader').style.display = '';
+        document.getElementById('ipo-error').style.display = 'none';
+        document.getElementById('ipo-table').style.display = 'none';
+        // Replace YOUR_IPOAPI_KEY with your actual ipoapi.in API key
+        const apiKey = 'YOUR_IPOAPI_KEY';
+        const url = `https://data.ipoapi.in/ipo/list/?api_key=${apiKey}`;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('ipo-loader').style.display = 'none';
+                if(data.status === 'success' && data.data && data.data.length > 0) {
+                    const tbody = document.getElementById('ipo-table-body');
+                    tbody.innerHTML = '';
+                    data.data.forEach(ipo => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${ipo.company_name}</td>
+                                <td>${ipo.open_date}</td>
+                                <td>${ipo.close_date}</td>
+                                <td>${ipo.price_band}</td>
+                                <td>${ipo.lot_size}</td>
+                                <td>${ipo.status}</td>
+                            </tr>
+                        `;
+                    });
+                    document.getElementById('ipo-table').style.display = '';
+                } else {
+                    document.getElementById('ipo-error').style.display = '';
+                    document.getElementById('ipo-error').textContent = 'No IPO data found.';
+                }
+            })
+            .catch(err => {
+                document.getElementById('ipo-loader').style.display = 'none';
+                document.getElementById('ipo-error').style.display = '';
+                document.getElementById('ipo-error').textContent = 'Failed to load IPO data.';
+            });
+    }
+    fetchIPOInfo();
+    </script>
+</body>
+</html> 

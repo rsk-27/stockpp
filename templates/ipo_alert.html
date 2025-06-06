@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPO Alert - Stock Market Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .ipo-alert-container {
+            max-width: 700px;
+            margin: 3rem auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(255, 152, 0, 0.13);
+            padding: 2.5rem 2rem;
+            animation: fadeIn 1s cubic-bezier(.77,0,.18,1);
+        }
+        .ipo-alert-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ff9800;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+        .ipo-alert-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .ipo-alert-list li {
+            background: #fff8e1;
+            border-radius: 10px;
+            margin-bottom: 1.2rem;
+            padding: 1.2rem 1rem;
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.07);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            font-size: 1.08rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .ipo-alert-list li:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.15);
+        }
+        .ipo-alert-list li i {
+            color: #ff9800;
+            font-size: 1.5rem;
+            margin-top: 0.1rem;
+        }
+        .ipo-alert-list li .ipo-info {
+            flex: 1;
+        }
+        .ipo-alert-list li .ipo-name {
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 0.3rem;
+        }
+        .ipo-alert-list li .ipo-details {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .ipo-loader {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        .ipo-error {
+            color: #ff4444;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+            gap: 0.5rem;
+        }
+        .pagination button {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: #ff9800;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        .pagination button:hover {
+            background: #f57c00;
+        }
+        .pagination button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .pagination span {
+            font-weight: 600;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="ipo-alert-container">
+        <div class="ipo-alert-title"><i class="fas fa-bell"></i> IPO Alerts</div>
+        <div id="ipo-loader" class="ipo-loader" style="display:none;">
+            <i class="fas fa-spinner fa-spin" style="font-size:2rem;color:#ff9800;"></i>
+        </div>
+        <ul class="ipo-alert-list" id="ipo-alert-list"></ul>
+        <div id="ipo-error" class="ipo-error" style="display:none;"></div>
+        <div class="pagination" id="pagination">
+            <button id="prev-page" disabled>Previous</button>
+            <span id="page-info">Page 1</span>
+            <button id="next-page">Next</button>
+        </div>
+    </div>
+    <script>
+        let currentPage = 1;
+        const itemsPerPage = 5;
+        let allIpos = [];
+
+        function fetchIPOAlerts() {
+            document.getElementById('ipo-loader').style.display = '';
+            document.getElementById('ipo-error').style.display = 'none';
+            document.getElementById('ipo-alert-list').innerHTML = '';
+        
+            const apiKey = 'f94f264d4cd0c2571e56c05b4ec20e430342965f7a5a75e524c7afd265ea7ad6';
+            const url = `https://api.ipoalerts.in/ipos?status=closed`;
+            const storageKey = 'ipoAlertsCache';
+        
+            // Try to load from localStorage
+            const cachedData = localStorage.getItem(storageKey);
+            if (cachedData) {
+                try {
+                    const parsedData = JSON.parse(cachedData);
+                    console.log("Loaded from localStorage");
+                    document.getElementById('ipo-loader').style.display = 'none';
+                    console.log(parsedData);
+                    if (parsedData.meta.count > 0) {
+                        allIpos = parsedData.ipos;
+                        displayCurrentPage();
+                        return;
+                    }
+                } catch (e) {
+                    console.warn("Failed to parse cached data", e);
+                    localStorage.removeItem(storageKey);
+                }
+            }
+        
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'x-api-key': apiKey
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Fetched from API");
+                localStorage.setItem(storageKey, JSON.stringify(data));
+                document.getElementById('ipo-loader').style.display = 'none';
+        
+                if (data.meta.count > 0) {
+                    allIpos = data.ipos;
+                    displayCurrentPage();
+                } else {
+                    document.getElementById('ipo-error').style.display = '';
+                    document.getElementById('ipo-error').textContent = 'No IPO alerts found.';
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('ipo-loader').style.display = 'none';
+                document.getElementById('ipo-error').style.display = '';
+                document.getElementById('ipo-error').textContent = 'Failed to load IPO alerts.';
+            });
+        }
+
+        function displayCurrentPage() {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentIpos = allIpos.slice(startIndex, endIndex);
+            
+            const list = currentIpos.map(ipo => `
+                <li onclick="viewIpoDetails(${JSON.stringify(ipo).replace(/"/g, '&quot;')})">
+                    <i class='fas fa-bell'></i>
+                    <div class="ipo-info">
+                        <div class="ipo-name">${ipo.name}</div>
+                        <div class="ipo-details">
+                            Price Range: ₹${ipo.priceRange} | Issue Size: ${ipo.issueSize}
+                        </div>
+                    </div>
+                </li>
+            `).join('');
+            
+            document.getElementById('ipo-alert-list').innerHTML = list;
+            
+            // Update pagination controls
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = endIndex >= allIpos.length;
+            document.getElementById('page-info').textContent = `Page ${currentPage}`;
+        }
+
+        function viewIpoDetails(ipo) {
+            localStorage.setItem('selectedIpo', JSON.stringify(ipo));
+            window.location.href = '/ipo-details';
+        }
+
+        // Pagination event listeners
+        document.getElementById('prev-page').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                displayCurrentPage();
+            }
+        });
+
+        document.getElementById('next-page').addEventListener('click', () => {
+            const maxPage = Math.ceil(allIpos.length / itemsPerPage);
+            if (currentPage < maxPage) {
+                currentPage++;
+                displayCurrentPage();
+            }
+        });
+        
+        fetchIPOAlerts();
+    </script>        
+</body>
+</html> 

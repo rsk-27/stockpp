@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPO Details - Stock Market Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .ipo-details-container {
+            max-width: 1000px;
+            margin: 3rem auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(76, 175, 80, 0.13);
+            padding: 2.5rem 2rem;
+            animation: fadeIn 1s cubic-bezier(.77,0,.18,1);
+        }
+        .ipo-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .ipo-logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .ipo-title {
+            flex: 1;
+        }
+        .ipo-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 0.5rem;
+        }
+        .ipo-symbol {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        .ipo-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        .status-closed {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        .status-open {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .ipo-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .detail-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .detail-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        .detail-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #222;
+        }
+        .schedule-section {
+            margin-top: 2rem;
+        }
+        .schedule-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 1rem;
+        }
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .schedule-table th, .schedule-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .schedule-table th {
+            font-weight: 600;
+            color: #4CAF50;
+            background: #f8f9fa;
+        }
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            background: #4CAF50;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            transition: background 0.3s ease;
+        }
+        .back-button:hover {
+            background: #43A047;
+        }
+    </style>
+</head>
+<body>
+    <div class="ipo-details-container">
+        <a href="/ipo-alert" class="back-button">
+            <i class="fas fa-arrow-left"></i> Back to IPO List
+        </a>
+        
+        <div class="ipo-header">
+            <img src="" alt="Company Logo" class="ipo-logo" id="ipo-logo">
+            <div class="ipo-title">
+                <h1 class="ipo-name" id="ipo-name"></h1>
+                <div class="ipo-symbol" id="ipo-symbol"></div>
+                <div class="ipo-status" id="ipo-status"></div>
+            </div>
+        </div>
+
+        <div class="ipo-details-grid">
+            <div class="detail-card">
+                <div class="detail-label">Issue Size</div>
+                <div class="detail-value" id="issue-size"></div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Price Range</div>
+                <div class="detail-value" id="price-range"></div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Minimum Quantity</div>
+                <div class="detail-value" id="min-qty"></div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Listing Date</div>
+                <div class="detail-value" id="listing-date"></div>
+            </div>
+        </div>
+
+        <div class="schedule-section">
+            <h2 class="schedule-title">IPO Schedule</h2>
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Get IPO data from localStorage
+        const ipoData = JSON.parse(localStorage.getItem('selectedIpo'));
+        
+        if (ipoData) {
+            // Set basic information
+            document.getElementById('ipo-logo').src = ipoData.logo;
+            document.getElementById('ipo-name').textContent = ipoData.name;
+            document.getElementById('ipo-symbol').textContent = ipoData.symbol;
+            document.getElementById('ipo-status').textContent = ipoData.status;
+            document.getElementById('ipo-status').classList.add(`status-${ipoData.status.toLowerCase()}`);
+            
+            // Set details
+            document.getElementById('issue-size').textContent = ipoData.issueSize;
+            document.getElementById('price-range').textContent = `₹${ipoData.priceRange}`;
+            document.getElementById('min-qty').textContent = ipoData.minQty;
+            document.getElementById('listing-date').textContent = new Date(ipoData.listingDate).toLocaleDateString();
+            
+            // Set schedule
+            const scheduleBody = document.getElementById('schedule-body');
+            ipoData.schedule.forEach(event => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${event.event.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
+                    <td>${new Date(event.date).toLocaleDateString()}</td>
+                `;
+                scheduleBody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html> 

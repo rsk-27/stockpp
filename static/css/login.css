@@ -1,0 +1,230 @@
+/* Professional login page styling */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 1.5rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.auth-box {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.auth-box h2 {
+    color: #333333;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.auth-box h2 i {
+    color: #4CAF50;
+    font-size: 1.6rem;
+}
+
+.error-message {
+    background-color: #fff2f2;
+    color: #ff4444;
+    padding: 0.8rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    border: 1px solid #ffdddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.error-message i {
+    font-size: 1rem;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 0.5rem;
+    padding: 0 0.5rem;
+}
+
+.input-group i {
+    color: #666666;
+    font-size: 1rem;
+    margin-right: 0.7rem;
+    flex-shrink: 0;
+    position: static;
+    top: auto;
+    left: auto;
+    transform: none;
+    transition: color 0.3s ease;
+}
+
+.input-group input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0.8rem 0.5rem;
+    font-size: 0.95rem;
+    color: #333333;
+    outline: none;
+    box-shadow: none;
+}
+
+.input-group input:focus {
+    background: #fff;
+}
+
+.input-group input::placeholder {
+    color: #999999;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.3rem;
+}
+
+.remember-me input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #4CAF50;
+    cursor: pointer;
+}
+
+.remember-me label {
+    color: #666666;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.auth-button {
+    width: 100%;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    background-color: #4CAF50;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.auth-button i {
+    font-size: 1rem;
+}
+
+.auth-button:hover {
+    background-color: #45a049;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
+.auth-button:active {
+    transform: translateY(0);
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.auth-links p {
+    color: #666666;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.auth-links a {
+    color: #4CAF50;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-left: 0.3rem;
+}
+
+.auth-links a:hover {
+    color: #45a049;
+    text-decoration: underline;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .auth-container {
+        padding: 1rem;
+    }
+
+    .auth-box {
+        padding: 1.5rem;
+    }
+
+    .auth-box h2 {
+        font-size: 1.6rem;
+    }
+
+    .input-group input {
+        font-size: 0.9rem;
+        padding: 0.7rem 0.7rem 0.7rem 2.5rem;
+    }
+
+    .auth-button {
+        font-size: 0.95rem;
+        padding: 0.7rem;
+    }
+}

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Trading - Stock Market Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/virtual_trading.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-chart-line"></i>
+            Stock Market Predictor
+        </div>
+        <div class="user-info">
+            <span>Welcome, {{ username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>Virtual Trading Dashboard</h1>
+            <div class="portfolio-summary">
+                <div class="summary-card">
+                    <h3>Total Portfolio Value</h3>
+                    <p id="totalValue">₹0.00</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Available Balance</h3>
+                    <p id="availableBalance">₹0.00</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Total P/L</h3>
+                    <p id="totalPL">₹0.00</p>
+                    <span id="plPercentage">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="main-content">
+                <div class="portfolio-section">
+                    <h2>Your Portfolio</h2>
+                    <div class="portfolio-chart">
+                        <canvas id="portfolioChart"></canvas>
+                    </div>
+                    <div class="holdings-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Stock</th>
+                                    <th>Quantity</th>
+                                    <th>Avg. Price</th>
+                                    <th>Current Price</th>
+                                    <th>Current Value</th>
+                                    <th>P/L</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="holdingsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="wishlist-section">
+                    <h2>Watchlist</h2>
+                    <div class="wishlist-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Stock</th>
+                                    <th>Current Price</th>
+                                    <th>Change</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wishlistTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="transaction-section">
+                    <h2>Transaction History</h2>
+                    <div class="transaction-list" id="transactionList">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trade Modal -->
+    <div id="tradeModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="tradeModalTitle">Trade Stock</h2>
+            <form id="tradeForm">
+                <input type="hidden" id="tradeSymbol">
+                <input type="hidden" id="tradeType">
+                <div class="form-group">
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" id="quantity" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="price">Price per share:</label>
+                    <input type="number" id="price" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Total Value:</label>
+                    <span id="totalValue">₹0.00</span>
+                </div>
+                <button type="submit" class="trade-btn">Execute Trade</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/virtual_trading.js') }}"></script>
+</body>
+</html> 
