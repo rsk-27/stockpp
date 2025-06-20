@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stock Market Predictor - Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+</head>
+<body>
+    <header class="hero-section fade-in">
+        <div class="container">
+            <h1 class="hero-title"><i class="fas fa-chart-line"></i> Stock Market Predictor</h1>
+            <p class="hero-subtitle">Your trusted tool for stock market insights and predictions.<br>Empowering you to make smarter investment decisions.</p>
+            <div class="auth-buttons">
+                <a href="{{ url_for('login') }}" class="btn primary"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="{{ url_for('signup') }}" class="btn secondary"><i class="fas fa-user-plus"></i> Sign Up</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content container fade-in" style="animation-delay:0.3s;">
+        <section class="features-section">
+            <h2 class="features-title"><i class="fas fa-star"></i> Why Choose Us?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                    <div class="feature-title">AI-Powered Predictions</div>
+                    <div class="feature-description">Get accurate, data-driven forecasts for your favorite stocks using advanced machine learning models.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="feature-title">Live Market Data</div>
+                    <div class="feature-description">Access real-time stock prices, technical indicators, and market trends at your fingertips.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-user-shield"></i></div>
+                    <div class="feature-title">Secure & Private</div>
+                    <div class="feature-description">Your data is protected with industry-standard security and privacy best practices.</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stocks-section">
+            <h2 class="stocks-title"><i class="fas fa-fire"></i> Featured Stocks</h2>
+            <div class="stocks-grid">
+                <div class="stock-card">
+                    <div class="stock-name"><i class="fas fa-building"></i> TCS</div>
+                    <div class="stock-price">₹3500.00</div>
+                    <div class="stock-change positive">+1.2%</div>
+                </div>
+                <div class="stock-card">
+                    <div class="stock-name"><i class="fas fa-industry"></i> Reliance</div>
+                    <div class="stock-price">₹2500.00</div>
+                    <div class="stock-change negative">-0.5%</div>
+                </div>
+                <div class="stock-card">
+                    <div class="stock-name"><i class="fas fa-university"></i> HDFC Bank</div>
+                    <div class="stock-price">₹1500.00</div>
+                    <div class="stock-change positive">+0.8%</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="news-tabs-section">
+            <div class="news-tabs">
+                <button class="news-tab active" id="market-news-tab" onclick="showNewsTab('market')"><i class="fas fa-newspaper"></i> Market News</button>
+                <button class="news-tab" id="economic-news-tab" onclick="showNewsTab('economic')"><i class="fas fa-rupee-sign"></i> Economic News</button>
+            </div>
+            <div class="news-tab-content" id="market-news-content">
+                <h2 class="features-title"><i class="fas fa-newspaper"></i> Latest Market News</h2>
+                <ul class="news-list">
+                    <li><a href="#"><i class="fas fa-arrow-up"></i> Stock markets rally on positive economic data</a></li>
+                    <li><a href="#"><i class="fas fa-microchip"></i> Tech stocks lead gains amid earnings reports</a></li>
+                    <li><a href="#"><i class="fas fa-globe"></i> Global markets react to central bank announcements</a></li>
+                </ul>
+            </div>
+            <div class="news-tab-content" id="economic-news-content" style="display:none;">
+                <h2 class="features-title"><i class="fas fa-rupee-sign"></i> Latest Economic News</h2>
+                <div id="economic-news-loader" style="display:none;text-align:center;margin:2rem 0;">
+                    <i class="fas fa-spinner fa-spin" style="font-size:2rem;color:#4CAF50;"></i>
+                </div>
+                <ul class="news-list" id="economic-news-list"></ul>
+                <div id="economic-news-error" style="display:none;color:#ff4444;text-align:center;margin-top:1rem;"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer fade-in" style="animation-delay:0.6s;">
+        <p>&copy; 2024 Stock Market Predictor. All rights reserved.</p>
+    </footer>
+
+    <script>
+    // Tab switching logic
+    function showNewsTab(tab) {
+        document.getElementById('market-news-tab').classList.remove('active');
+        document.getElementById('economic-news-tab').classList.remove('active');
+        document.getElementById('market-news-content').style.display = 'none';
+        document.getElementById('economic-news-content').style.display = 'none';
+        if(tab === 'market') {
+            document.getElementById('market-news-tab').classList.add('active');
+            document.getElementById('market-news-content').style.display = '';
+        } else {
+            document.getElementById('economic-news-tab').classList.add('active');
+            document.getElementById('economic-news-content').style.display = '';
+            fetchEconomicNews();
+        }
+    }
+
+    // Fetch economic news from NewsData.io
+    let economicNewsLoaded = false;
+    function fetchEconomicNews() {
+        if(economicNewsLoaded) return;
+        economicNewsLoaded = true;
+        document.getElementById('economic-news-loader').style.display = '';
+        document.getElementById('economic-news-list').innerHTML = '';
+        document.getElementById('economic-news-error').style.display = 'none';
+        // Replace YOUR_API_KEY with your actual NewsData.io API key
+        const apiKey = 'pub_e2b0d9b652cd4b1d907bfd98a8fddcbf';
+        const url = `https://newsdata.io/api/1/news?apikey=${apiKey}&country=in&q=(economy%20OR%20finance%20OR%20business)%20AND%20(global%20OR%20international%20OR%20world)&language=en&category=business`;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('economic-news-loader').style.display = 'none';
+                if(data.status === 'success' && data.results && data.results.length > 0) {
+                    const headlines = data.results.slice(0, 7);
+                    const list = headlines.map(news => {
+                        // Store news data in localStorage for detail page
+                        const newsId = news.article_id || btoa(news.link); // fallback to base64 of link if no id
+                        localStorage.setItem('news_' + newsId, JSON.stringify(news));
+                        return `<li><a href="/news/${newsId}" onclick="localStorage.setItem('news_${newsId}', JSON.stringify(${JSON.stringify(news).replace(/"/g, '&quot;')}))"><i class=\"fas fa-globe\"></i> ${news.title}</a></li>`;
+                    }).join('');
+                    document.getElementById('economic-news-list').innerHTML = list;
+                } else {
+                    document.getElementById('economic-news-error').style.display = '';
+                    document.getElementById('economic-news-error').textContent = 'No economic news found.';
+                }
+            })
+            .catch(err => {
+                document.getElementById('economic-news-loader').style.display = 'none';
+                document.getElementById('economic-news-error').style.display = '';
+                document.getElementById('economic-news-error').textContent = 'Failed to load economic news.';
+            });
+    }
+    </script>
+</body>
+</html>

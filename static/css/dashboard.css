@@ -1,0 +1,300 @@
+/* Professional dashboard styling */
+
+:root {
+    --primary-color: #4CAF50;
+    --primary-dark: #388E3C;
+    --primary-light: #E8F5E9;
+    --text-dark: #333333;
+    --text-light: #666666;
+    --background-light: #FFFFFF;
+    --background-off: #F8F9FA;
+    --border-color: #E0E0E0;
+    --success-color: #4CAF50;
+    --error-color: #f44336;
+    --shadow-sm: 0 2px 4px rgba(76, 175, 80, 0.1);
+    --shadow-md: 0 4px 8px rgba(76, 175, 80, 0.15);
+    --shadow-lg: 0 8px 16px rgba(76, 175, 80, 0.2);
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--background-off);
+    color: var(--text-dark);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar {
+    background: var(--background-light);
+    padding: 1rem 2rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-brand i {
+    font-size: 1.8rem;
+    animation: spin 10s linear infinite;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.nav-link {
+    color: var(--text-dark);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: color 0.2s;
+}
+
+.nav-link:hover {
+    color: var(--primary-color);
+}
+
+.user-info {
+    color: #666666;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logout-btn {
+    color: #4CAF50;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: color 0.3s ease;
+}
+
+.logout-btn:hover {
+    color: #45a049;
+}
+
+.dashboard-container {
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    animation: fadeIn 1s ease;
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Sector and Company Selection */
+.sector-dropdowns {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.dropdown-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.dropdown-group label {
+    font-weight: 600;
+    color: #333333;
+}
+
+.dropdown {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #f8f9fa;
+    color: #333333;
+    transition: all 0.3s ease;
+    min-width: 200px;
+    cursor: pointer;
+}
+
+.dropdown:focus {
+    outline: none;
+    border-color: #4CAF50;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.dropdown:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.dropdown option {
+    background-color: #ffffff;
+    color: #333333;
+    padding: 10px;
+}
+
+.company-details {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    animation: slideIn 0.5s ease;
+}
+
+.company-info {
+    flex: 1;
+    min-width: 280px;
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.company-info:hover {
+    transform: translateY(-5px);
+}
+
+.company-info h2 {
+    margin-top: 0;
+    color: #333333;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.stock-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.stock-info > div {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.stock-info > div:hover {
+    background-color: #ffffff;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.stock-info h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333333;
+}
+
+.stock-info p {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #4CAF50;
+}
+
+.chart-section {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto 2rem auto;
+}
+
+.chart-controls {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    gap: 1rem;
+}
+
+.chart-container {
+    flex: 2;
+    min-width: 900px;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 2rem 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 1s ease;
+    overflow-x: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#stockChart {
+    width: 100% !important;
+    max-width: 1000px !important;
+    height: 400px !important;
+    margin: 0 auto;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .company-details {
+        flex-direction: column;
+    }
+    .chart-container {
+        min-width: 100%;
+    }
+    .company-info {
+        min-width: 100%;
+    }
+}
+
+/* Animations */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}

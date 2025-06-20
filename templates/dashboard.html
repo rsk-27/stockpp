@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stock Market Predictor - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-chart-line"></i>
+            Stock Market Predictor
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('ipo_alert') }}" class="nav-link">
+                <i class="fas fa-bell"></i> IPO Alert
+            </a>
+            <a href="{{ url_for('virtual_trading') }}" class="nav-link">
+                <i class="fas fa-coins"></i> Virtual Trading
+            </a>
+        </div>
+        <div class="user-info">
+            <span>Welcome, {{ username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="sector-dropdowns">
+            <div class="dropdown-group">
+                <label for="sectorSelect">Select Sector:</label>
+                <select id="sectorSelect" class="dropdown">
+                    <option value="" disabled selected>Select a sector</option>
+                </select>
+            </div>
+            <div class="dropdown-group">
+                <label for="companySelect">Select Company:</label>
+                <select id="companySelect" class="dropdown">
+                    <option value="" disabled selected>Select a company</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="chart-section" style="display: flex; flex-direction: column; align-items: stretch; width: 100%; max-width: 1100px; margin: 0 auto 2rem auto;">
+            <div class="chart-controls" style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 0.5rem; gap: 1rem;">
+                <!-- Time Range dropdown removed -->
+            </div>
+            <div class="chart-container" aria-label="Stock Price Chart" style="position:relative;">
+                <div id="chart-loading" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(255,255,255,0.7);z-index:10;display:flex;align-items:center;justify-content:center;">
+                    <div style="text-align:center;">
+                        <div class="spinner" style="margin-bottom:1rem;width:48px;height:48px;border:6px solid #21ce99;border-top:6px solid #fff;border-radius:50%;animation:spin 1s linear infinite;"></div>
+                        <div style="color:#21ce99;font-weight:bold;">Loading chart data...</div>
+                    </div>
+                </div>
+                <canvas id="stockChart" role="img" aria-describedby="chartDesc"></canvas>
+                <div id="chartDesc" class="sr-only">Line chart showing historical and predicted stock prices</div>
+            </div>
+            <style>
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            </style>
+        </div>
+
+        <div class="company-details" aria-live="polite" aria-atomic="true" style="display: flex; gap: 2rem; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 250px;">
+                <h2 id="companyName">Select a company to view details</h2>
+                <div class="stock-info">
+                    <div class="current-price">
+                        <h3>Current Price</h3>
+                        <p id="currentPrice">--</p>
+                    </div>
+                    <div class="prediction">
+                        <h3>Prediction</h3>
+                        <p id="prediction">--</p>
+                    </div>
+                    <div class="change">
+                        <h3>Change</h3>
+                        <p id="change">--</p>
+                    </div>
+                    <div class="next-day-prediction">
+                        <h3>Next Day Prediction</h3>
+                        <p id="predictedPriceNext">--</p>
+                    </div>
+                    <div class="wishlist-action" style="margin-top: 1rem;">
+                        <button id="addToWishlist" class="action-btn watch-btn" style="display: none;">
+                            <i class="fas fa-star"></i> Add to Wishlist
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="technical-indicators">
+                    <h3>Technical Indicators</h3>
+                    <div class="indicators-grid">
+                        <div class="indicator">
+                            <h4>RSI</h4>
+                            <p id="rsi">--</p>
+                        </div>
+                        <div class="indicator">
+                            <h4>SMA (5)</h4>
+                            <p id="sma5">--</p>
+                        </div>
+                        <div class="indicator">
+                            <h4>SMA (20)</h4>
+                            <p id="sma20">--</p>
+                        </div>
+                        <div class="indicator">
+                            <h4>SMA (50)</h4>
+                            <p id="sma50">--</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="market-stats">
+                    <h3>Market Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat">
+                            <h4>Volume</h4>
+                            <p id="volume">--</p>
+                        </div>
+                        <div class="stat">
+                            <h4>52 Week High</h4>
+                            <p id="high52w">--</p>
+                        </div>
+                        <div class="stat">
+                            <h4>52 Week Low</h4>
+                            <p id="low52w">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Economic News Section -->
+    <div class="dashboard-news-section" style="max-width: 900px; margin: 2rem auto 0 auto; background: #fff; border-radius: 18px; box-shadow: 0 8px 32px rgba(76, 175, 80, 0.13); padding: 2rem 1.5rem;">
+        <h2 style="color:#222; font-size:1.7rem; display:flex; align-items:center; gap:0.7rem;"><i class="fas fa-rupee-sign"></i> Latest Economic News</h2>
+        <div id="dashboard-news-loader" style="display:none;text-align:center;margin:2rem 0;">
+            <i class="fas fa-spinner fa-spin" style="font-size:2rem;color:#4CAF50;"></i>
+        </div>
+        <ul class="news-list" id="dashboard-news-list"></ul>
+        <div id="dashboard-news-error" style="display:none;color:#ff4444;text-align:center;margin-top:1rem;"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script>
+    // Fetch economic news for dashboard
+    const cache ={};
+    function fetchDashboardNews() {
+        
+        document.getElementById('dashboard-news-loader').style.display = '';
+        document.getElementById('dashboard-news-list').innerHTML = '';
+        document.getElementById('dashboard-news-error').style.display = 'none';
+        // Replace YOUR_API_KEY with your actual NewsData.io API key
+        const apiKey = 'pub_e2b0d9b652cd4b1d907bfd98a8fddcbf';
+        const url = `https://newsdata.io/api/1/news?apikey=${apiKey}&country=in&q=(economy%20OR%20finance%20OR%20business)%20AND%20(global%20OR%20international%20OR%20world)&language=en&category=business`;
+        if (cache[url]) {
+            data = cache[url];
+            document.getElementById('dashboard-news-loader').style.display = 'none';
+            if(data.status === 'success' && data.results.length > 0) {
+                const headlines = data.results.slice(0, 7);
+                const list = headlines.map(news => {
+                    const newsId = news.article_id || btoa(news.link);
+                    localStorage.setItem('news_' + newsId, JSON.stringify(news));
+                    return `<li><a href="/news/${newsId}" onclick="localStorage.setItem('news_${newsId}', JSON.stringify(${JSON.stringify(news).replace(/\"/g, '&quot;')}))"><i class=\"fas fa-globe\"></i> ${news.title}</a></li>`;
+                }).join('');
+                document.getElementById('dashboard-news-list').innerHTML = list;
+            } else {
+                document.getElementById('dashboard-news-error').style.display = '';
+                document.getElementById('dashboard-news-error').textContent = 'No economic news found.';
+            }
+        } else {
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                cache[url] = data;
+                document.getElementById('dashboard-news-loader').style.display = 'none';
+                if(data.status === 'success' && data.results.length > 0) {
+                    const headlines = data.results.slice(0, 7);
+                    const list = headlines.map(news => {
+                        const newsId = news.article_id || btoa(news.link);
+                        localStorage.setItem('news_' + newsId, JSON.stringify(news));
+                        return `<li><a href="/news/${newsId}" onclick="localStorage.setItem('news_${newsId}', JSON.stringify(${JSON.stringify(news).replace(/\"/g, '&quot;')}))"><i class=\"fas fa-globe\"></i> ${news.title}</a></li>`;
+                    }).join('');
+                    document.getElementById('dashboard-news-list').innerHTML = list;
+                } else {
+                    document.getElementById('dashboard-news-error').style.display = '';
+                    document.getElementById('dashboard-news-error').textContent = 'No economic news found.';
+                }
+            })
+            .catch(err => {
+                document.getElementById('dashboard-news-loader').style.display = 'none';
+                document.getElementById('dashboard-news-error').style.display = '';
+                document.getElementById('dashboard-news-error').textContent = 'Failed to load economic news.';
+            });
+          }
+    }
+    fetchDashboardNews();
+    </script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPO Alert - Stock Market Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            margin: 0;
+        }
+        .ipo-alert-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #4CAF50;
+            margin: 2.5rem 0 2rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            justify-content: center;
+        }
+        .ipo-alert-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 auto 2rem auto;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        @media (max-width: 900px) {
+            .ipo-alert-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 600px) {
+            .ipo-alert-list {
+                grid-template-columns: 1fr;
+            }
+        }
+        .ipo-alert-list li {
+            background: #f3fff6;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.07);
+            padding: 1.5rem 2.5rem 1.2rem 2.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1.2rem;
+            font-size: 1.15rem;
+            font-weight: 500;
+            color: #333;
+            border: 1.5px solid #b2f2c9;
+            transition: box-shadow 0.2s;
+        }
+        .ipo-alert-list li:hover {
+            box-shadow: 0 6px 18px rgba(76, 175, 80, 0.13);
+        }
+        .ipo-alert-list .ipo-alert-icon {
+            color: #4CAF50;
+            font-size: 1.7rem;
+            margin-top: 0.2rem;
+        }
+        .ipo-alert-list .ipo-alert-details {
+            flex: 1;
+        }
+        .ipo-alert-list .ipo-alert-title {
+            font-size: 1.18rem;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 0.3rem;
+        }
+        .ipo-alert-list .ipo-alert-meta {
+            color: #666;
+            font-size: 1.05rem;
+        }
+        .ipo-loader {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .ipo-error {
+            color: #f44336;
+            text-align: center;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .pagination button {
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: #fff;
+            color: #4CAF50;
+            border: 2px solid #4CAF50;
+            transition: background 0.2s, color 0.2s;
+        }
+        .pagination button:disabled {
+            background: #e0e0e0;
+            color: #888;
+            border-color: #e0e0e0;
+            cursor: not-allowed;
+        }
+        .pagination button:not(:disabled):hover {
+            background: #4CAF50;
+            color: #fff;
+        }
+        .pagination #page-info {
+            font-size: 1.1rem;
+            color: #333;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="ipo-alert-title">
+        <i class="fas fa-bell"></i>
+        IPO Alerts
+    </div>
+    <ul class="ipo-alert-list" id="ipo-alert-list">
+        <!-- IPO alert items will be rendered here by JS -->
+    </ul>
+    <div class="pagination">
+        <button id="prevBtn" disabled>Previous</button>
+        <span id="page-info">Page 1</span>
+        <button id="nextBtn">Next</button>
+    </div>
+        <div id="ipo-loader" class="ipo-loader" style="display:none;">
+            <i class="fas fa-spinner fa-spin" style="font-size:2rem;color:#ff9800;"></i>
+        </div>
+        <div id="ipo-error" class="ipo-error" style="display:none;"></div>
+    <script>
+        let currentPage = 1;
+        const itemsPerPage = 5;
+        // Sample IPO data (replace with API call if needed)
+        const allIpos = [
+            { name: 'SPP Polymers', meta: 'Price Range: ₹59-59 | Issue Size: 24cr' },
+            { name: 'Trafiksol ITS Technologies', meta: 'Price Range: ₹66-70 | Issue Size: 45cr' },
+            { name: 'Innomet Advanced Materials', meta: 'Price Range: ₹100-100 | Issue Size: 34cr' },
+            { name: 'Gajanand International', meta: 'Price Range: ₹36-36 | Issue Size: 21cr' },
+            { name: 'Sodhani Academy of Fintech Enablers', meta: 'Price Range: ₹40-40 | Issue Size: 6cr' },
+            // Add more IPOs as needed
+        ];
+
+        function renderIpos() {
+            const ipoList = document.getElementById('ipo-alert-list');
+            ipoList.innerHTML = '';
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, allIpos.length);
+            for (let i = startIndex; i < endIndex; i++) {
+                const ipo = allIpos[i];
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="ipo-alert-icon"><i class="fas fa-bell"></i></span>
+                    <div class="ipo-alert-details">
+                        <div class="ipo-alert-title">${ipo.name}</div>
+                        <div class="ipo-alert-meta">${ipo.meta}</div>
+                    </div>
+                `;
+                ipoList.appendChild(li);
+            }
+            // Update pagination controls
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = endIndex >= allIpos.length;
+            document.getElementById('page-info').textContent = `Page ${currentPage}`;
+        }
+
+        // Pagination event listeners
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderIpos();
+            }
+        });
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            const maxPage = Math.ceil(allIpos.length / itemsPerPage);
+            if (currentPage < maxPage) {
+                currentPage++;
+                renderIpos();
+            }
+        });
+        
+        // Initial render
+        renderIpos();
+    </script>        
+</body>
+</html> 

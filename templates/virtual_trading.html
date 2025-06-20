@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Virtual Trading Simulator</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: #f6faf7;
+        }
+        .navbar {
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #219150;
+            gap: 0.5rem;
+        }
+        .nav-brand img {
+            height: 36px;
+            margin-right: 0.5rem;
+        }
+        .user-info {
+            font-size: 1rem;
+            color: #333;
+        }
+        .logout-btn {
+            color: #219150;
+            margin-left: 1rem;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .container {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 6px 32px rgba(33,145,80,0.08);
+            padding: 2.5rem 2rem 2rem 2rem;
+            margin-top: 2.5rem;
+        }
+        h2 {
+            color: #219150;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+        label {
+            font-weight: 500;
+            color: #333;
+        }
+        .form-control, select {
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .btn-success {
+            background: #219150;
+            border: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .btn-success:hover {
+            background: #176b3a;
+        }
+        .card {
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(33,145,80,0.07);
+            border: none;
+            margin-bottom: 1.2rem;
+        }
+        .card h5 {
+            color: #219150;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        #priceChart {
+            background: #f8fdfb;
+            border-radius: 10px;
+            box-shadow: 0 1px 8px rgba(33,145,80,0.04);
+            padding: 0.5rem;
+        }
+        @media (max-width: 900px) {
+            .container { padding: 1rem; }
+        }
+        @media (max-width: 700px) {
+            .container { padding: 0.5rem; }
+            .row.mb-3 { flex-direction: column; }
+            .col-md-8, .col-md-4 { width: 100%; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fa-solid fa-chart-line fa-lg"></i>
+            <span>Stock Market Predictor</span>
+        </div>
+        <div class="user-info">
+            <span>Welcome, {{ username }}</span>
+            <a href="{{ url_for('logout') }}" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+    <div class="container mt-4" style="max-width: 900px;">
+        <h2 class="mb-4 text-center">Educational Virtual Trading Simulator</h2>
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label for="stockSelect">Stock:</label>
+                <select id="stockSelect" class="form-control">
+                    <option value="technology/tcs">TCS</option>
+                    <option value="technology/infosys">Infosys</option>
+                    <option value="technology/wipro">Wipro</option>
+                    <option value="banking/hdfc-bank">HDFC Bank</option>
+                    <option value="banking/icici-bank">ICICI Bank</option>
+                    <option value="banking/sbi">SBI</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="quantityInput">Quantity:</label>
+                <input type="number" id="quantityInput" class="form-control" value="1" min="1">
+            </div>
+            <div class="col-md-3">
+                <label for="priceInput">Price (₹):</label>
+                <input type="number" id="priceInput" class="form-control" value="0" min="0" readonly>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button class="btn btn-success w-100 py-2" style="font-size:1.2rem;" onclick="showEducationalMessage()">
+                    <i class="fa-solid fa-graduation-cap me-2"></i>Buy
+                </button>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-8">
+                <div class="card p-3">
+                    <h5>Price Chart</h5>
+                    <canvas id="priceChart" height="120"></canvas>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-3 mb-3">
+                    <h5>Simulated Portfolio Value</h5>
+                    <div id="portfolioValue">₹0.00</div>
+                </div>
+                <div class="card p-3 mb-3">
+                    <h5>Simulated P/L</h5>
+                    <div id="plValue">₹0.00 (0.00%)</div>
+                </div>
+                <div class="card p-3">
+                    <h5>Simulated Holdings</h5>
+                    <div id="holdings">None</div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+// ... (keep the latest JS logic for random prices and chart from previous step) ...
+</script>
+</body>
+</html> 
