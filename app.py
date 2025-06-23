@@ -18,7 +18,6 @@ import requests
 
 # Add the current directory to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from virtual_trading import VirtualTrading
 
 import re
 
@@ -38,7 +37,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 
-ALPHA_VANTAGE_API_KEY = 'YFSSDLCED6DWNWO1'
+ALPHA_VANTAGE_API_KEY = 'IE8YEI18T22XHTRG'
 # NEWS_API_KEY = 'd1ba48634a144e8db453d3ae0447998d'
 
 # Updated stock_symbols for Alpha Vantage (NSE/BSE symbols)
@@ -75,9 +74,6 @@ prediction_cache = {}
 user_request_times = defaultdict(list)
 REQUEST_LIMIT = 5
 REQUEST_WINDOW = 60  # seconds
-
-# Initialize virtual trading
-virtual_trading = VirtualTrading()
 
 TWELVE_SYMBOLS = {
     'bse': 'SENSEX',
@@ -243,13 +239,6 @@ def to_python_type(val):
     return val
 
 def is_rate_limited(username):
-    now = time.time()
-    times = user_request_times[username]
-    # Remove requests older than window
-    user_request_times[username] = [t for t in times if now - t < REQUEST_WINDOW]
-    if len(user_request_times[username]) >= REQUEST_LIMIT:
-        return True
-    user_request_times[username].append(now)
     return False
 
 @app.route('/api/clear-cache', methods=['POST'])
