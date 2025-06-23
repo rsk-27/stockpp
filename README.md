@@ -29,7 +29,7 @@ A modern web application for stock market prediction, educational virtual tradin
 
 ### 1. **Clone the Repository**
 ```bash
-git clone [https://github.com/rsk-27/stockpp](https://github.com/rsk-27/stockpp).git
+git clone https://github.com/rsk-27/stockpp.git
 cd your-repo
 ```
 
@@ -44,16 +44,6 @@ pip install -r requirements.txt
 python app.py
 ```
 Visit [http://localhost:5000](http://localhost:5000) in your browser.
-
-### 4. **Deploy to Render/Railway**
-- Push your code to GitHub.
-- Connect your repo on [Render](https://render.com) or [Railway](https://railway.app).
-- The platform will use:
-  - `requirements.txt` for dependencies
-  - `Procfile` for the start command
-  - `runtime.txt` for Python version
-
----
 
 ## ⚙️ Configuration
 
