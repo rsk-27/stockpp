@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body {
             background: #f6faf7;
@@ -103,7 +104,7 @@
     <nav class="navbar">
         <div class="nav-brand">
             <i class="fa-solid fa-chart-line fa-lg"></i>
-            <span>Stock Market Predictor</span>
+            <a href="{{ url_for('dashboard') }}" style="text-decoration:none; color:inherit;"><span>Stock Market Predictor</span></a>
         </div>
         <div class="user-info">
             <span>Welcome, {{ username }}</span>
@@ -112,11 +113,11 @@
             </a>
         </div>
     </nav>
-    <div class="container mt-4" style="max-width: 900px;">
+    <div class="container mt-4" style="max-width: 1000px;">
         <h2 class="mb-4 text-center">Educational Virtual Trading Simulator</h2>
-        <div class="row mb-3">
-            <div class="col-md-3">
-                <label for="stockSelect">Stock:</label>
+        <form class="row g-3 align-items-end mb-4" autocomplete="off">
+            <div class="col-md-2">
+                <label for="stockSelect" class="form-label">Stock:</label>
                 <select id="stockSelect" class="form-control">
                     <option value="technology/tcs">TCS</option>
                     <option value="technology/infosys">Infosys</option>
@@ -126,28 +127,49 @@
                     <option value="banking/sbi">SBI</option>
                 </select>
             </div>
-            <div class="col-md-3">
-                <label for="quantityInput">Quantity:</label>
+            <div class="col-md-1">
+                <label for="quantityInput" class="form-label">Quantity:</label>
                 <input type="number" id="quantityInput" class="form-control" value="1" min="1">
             </div>
-            <div class="col-md-3">
-                <label for="priceInput">Price (₹):</label>
-                <input type="number" id="priceInput" class="form-control" value="0" min="0" readonly>
+            <div class="col-md-2">
+                <label for="priceInput" class="form-label">Price (₹):</label>
+                <input type="number" id="priceInput" class="form-control" value="0" min="0">
             </div>
-            <div class="col-md-3 d-flex align-items-end">
-                <button class="btn btn-success w-100 py-2" style="font-size:1.2rem;" onclick="showEducationalMessage()">
-                    <i class="fa-solid fa-graduation-cap me-2"></i>Buy
+            <div class="col-md-2">
+                <label for="orderTypeSelect" class="form-label">Order Type:
+                  <i class="fa fa-info-circle" title="Market: Executes at current price. Limit: Executes at your set price or better."></i>
+                </label>
+                <select id="orderTypeSelect" class="form-control">
+                  <option value="market">Market</option>
+                  <option value="limit">Limit</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="slippageInput" class="form-label">Slippage (%)
+                  <i class="fa fa-info-circle" title="Slippage is the difference between expected and actual execution price due to market impact."></i>
+                </label>
+                <input type="number" id="slippageInput" class="form-control" value="0.1" min="0" step="0.01">
+            </div>
+            <div class="col-md-2">
+                <label for="simulatedPrice" class="form-label">Simulated Execution Price (₹):
+                  <i class="fa fa-info-circle" title="This is the price you would actually get, considering quantity and slippage."></i>
+                </label>
+                <input type="number" id="simulatedPrice" class="form-control" value="0" min="0" readonly>
+            </div>
+            <div class="col-md-1 d-grid">
+                <button id="calculateBtn" type="button" class="btn btn-success">
+                    <i class="fa-solid fa-calculator me-2"></i>Calculate
                 </button>
             </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-md-8">
-                <div class="card p-3">
+        </form>
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card p-3 h-100">
                     <h5>Price Chart</h5>
-                    <canvas id="priceChart" height="120"></canvas>
+                    <div id="priceChart" style="height: 320px;"></div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-lg-4">
                 <div class="card p-3 mb-3">
                     <h5>Simulated Portfolio Value</h5>
                     <div id="portfolioValue">₹0.00</div>
@@ -163,8 +185,16 @@
             </div>
         </div>
     </div>
-<script>
-// ... (keep the latest JS logic for random prices and chart from previous step) ...
-</script>
+    <!-- Hidden containers for JS compatibility -->
+    <div style="display:none">
+        <table><tbody id="availableStocksTableBody"></tbody></table>
+        <table><tbody id="holdingsTableBody"></tbody></table>
+        <div id="transactionList"></div>
+        <span id="totalValue"></span>
+        <span id="availableBalance"></span>
+        <span id="totalPL"></span>
+        <span id="plPercentage"></span>
+    </div>
+<script src="{{ url_for('static', filename='js/virtual_trading.js') }}"></script>
 </body>
 </html> 

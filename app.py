@@ -3,7 +3,6 @@ import os
 import json
 import logging
 import traceback
-import yfinance as yf
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
@@ -15,6 +14,7 @@ import os
 from collections import defaultdict
 import time
 from alpha_vantage.timeseries import TimeSeries
+import requests
 
 # Add the current directory to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -39,6 +39,7 @@ app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 
 ALPHA_VANTAGE_API_KEY = 'YFSSDLCED6DWNWO1'
+# NEWS_API_KEY = 'd1ba48634a144e8db453d3ae0447998d'
 
 # Updated stock_symbols for Alpha Vantage (NSE/BSE symbols)
 stock_symbols = {
@@ -78,6 +79,25 @@ REQUEST_WINDOW = 60  # seconds
 # Initialize virtual trading
 virtual_trading = VirtualTrading()
 
+TWELVE_SYMBOLS = {
+    'bse': 'SENSEX',
+    'nse': 'NSEI',
+    'niftybank': 'NSEBANK',
+    'niftyit': 'CNXIT'
+}
+
+USERS_XLSX = 'users.xlsx'
+
+# Helper to load users from Excel
+def load_users():
+    if not os.path.exists(USERS_XLSX):
+        return pd.DataFrame(columns=['username', 'password'])
+    return pd.read_excel(USERS_XLSX)
+
+# Helper to save users to Excel
+def save_users(df):
+    df.to_excel(USERS_XLSX, index=False)
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -114,18 +134,18 @@ def signup():
         if request.method == 'GET':
             logger.debug("Rendering signup page")
             return render_template('signup.html')
-        
         username = request.form.get('username')
         password = request.form.get('password')
         logger.debug(f"Signup attempt for user: {username}")
-        
-        # Validate credentials
         is_valid, error_message = validate_credentials(username, password)
         if not is_valid:
             return render_template('signup.html', error=error_message), 400
-        
-        # For testing, accept any username/password
-        # In production, you would store the hashed password
+        users_df = load_users()
+        if username in users_df['username'].values:
+            return render_template('signup.html', error="Username already exists."), 400
+        new_row = pd.DataFrame([{'username': username, 'password': password}])
+        users_df = pd.concat([users_df, new_row], ignore_index=True)
+        save_users(users_df)
         session['username'] = username
         logger.debug(f"Signup successful for user: {username}")
         return redirect(url_for('dashboard'))
@@ -140,17 +160,18 @@ def login():
         if request.method == 'GET':
             logger.debug("Rendering login page")
             return render_template('login.html')
-        
         username = request.form.get('username')
         password = request.form.get('password')
         logger.debug(f"Login attempt for user: {username}")
-        
-        # Validate credentials
         is_valid, error_message = validate_credentials(username, password)
         if not is_valid:
             return render_template('login.html', error=error_message), 400
-        
-        # For testing, accept any username/password
+        users_df = load_users()
+        user_row = users_df[users_df['username'] == username]
+        if user_row.empty:
+            return render_template('login.html', error="User does not exist."), 400
+        if user_row.iloc[0]['password'] != password:
+            return render_template('login.html', error="Incorrect password."), 400
         session['username'] = username
         logger.debug(f"Login successful for user: {username}")
         return redirect(url_for('dashboard'))
@@ -290,7 +311,7 @@ def get_stock_data(sector, company):
         rs = gain / loss
         data['RSI'] = 100 - (100 / (1 + rs))
 
-        # Use last available data for prediction
+        # Use last available data for prediction (simple moving average as a placeholder)
         X = data[['4. close', 'SMA_5', 'SMA_20', 'SMA_50', 'RSI']].dropna()
         if len(X) < 2:
             logger.error(f"Not enough data for prediction for {symbol}")
@@ -300,8 +321,43 @@ def get_stock_data(sector, company):
                 'message': f'Not enough data for prediction for {symbol}'
             }), 400
 
-        # Simple prediction: next day's price = last close (placeholder, you can improve this)
-        predicted_price = X.iloc[-1]['4. close']
+        # --- Advanced: Random Forest Regressor for Prediction ---
+        N = 30  # number of days to use for training
+        features = ['4. close', 'SMA_5', 'SMA_20', 'SMA_50', 'RSI']
+        X_hist = X[features].values[-N:] if len(X) >= N else X[features].values
+        y_hist = X['4. close'].values[-N:] if len(X) >= N else X['4. close'].values
+        # Use previous N-1 rows to predict the Nth row
+        if len(X_hist) > 5:
+            X_train = X_hist[:-1]
+            y_train = y_hist[1:]
+            model = RandomForestRegressor(n_estimators=100, random_state=42)
+            model.fit(X_train, y_train)
+            # Predict next day using the last available row
+            X_pred = X_hist[-1].reshape(1, -1)
+            predicted_price = model.predict(X_pred)[0]
+        else:
+            predicted_price = X['4. close'].values[-1]
+        # --- End Random Forest ---
+
+        # Determine the number of days for the selected period
+        period_map = {'1D': 1, '1W': 7, '1M': 30, '1Y': 365, '5Y': 365*5, 'MAX': None}
+        period_days = period_map.get(period.upper(), 365)
+        if period_days is not None:
+            X_period = X.tail(period_days)
+        else:
+            X_period = X
+        closes_period = X_period['4. close'].values
+        days_period = np.arange(len(closes_period))
+        # Polynomial regression (degree 2)
+        if len(closes_period) > 2:
+            coeffs = np.polyfit(days_period, closes_period, 2)
+            regression_line = (coeffs[0]*days_period**2 + coeffs[1]*days_period + coeffs[2]).tolist()
+        elif len(closes_period) > 1:
+            a, b = np.polyfit(days_period, closes_period, 1)
+            regression_line = (a * days_period + b).tolist()
+        else:
+            regression_line = closes_period.tolist()
+
         current_price = X.iloc[-1]['4. close']
         prev_price = X.iloc[-2]['4. close']
         change = ((current_price - prev_price) / prev_price) * 100
@@ -321,8 +377,9 @@ def get_stock_data(sector, company):
                 'volume': int(data.iloc[-1]['5. volume']),
                 'high_52w': float(data['2. high'].max()),
                 'low_52w': float(data['3. low'].min()),
-                'historical_dates': [str(d) for d in data.index.strftime('%Y-%m-%d').tolist()],
-                'historical_prices': [float(x) for x in data['4. close'].tolist()]
+                'historical_dates': [str(d) for d in X_period.index.strftime('%Y-%m-%d').tolist()],
+                'historical_prices': [float(x) for x in closes_period.tolist()],
+                'regression_line': regression_line,
             },
             'timestamp': str(datetime.now().isoformat())
         }
@@ -343,152 +400,29 @@ def news_detail(news_id):
     # The news data will be loaded on the client side via JS (from localStorage or query params)
     return render_template('news_detail.html', news_id=news_id)
 
+def fetch_news():
+    url = f"https://financialmodelingprep.com/api/v4/general_news?page=0&apikey={ALPHA_VANTAGE_API_KEY}"
+    try:
+        response = requests.get(url)
+        data = response.json()
+        logger.debug(f"FMP News response: {data}")
+        if isinstance(data, list):
+            return data
+        else:
+            logger.error(f"FMP returned unexpected data: {data}")
+            return []
+    except Exception as e:
+        logger.error(f"Error fetching news from FMP: {e}")
+        return []
+
 @app.route('/ipo-alert')
 def ipo_alert():
-    return render_template('ipo_alert.html')
+    news_articles = fetch_news()
+    return render_template('ipo_alert.html', news_articles=news_articles)
 
 @app.route('/ipo-details')
 def ipo_details():
     return render_template('ipo_details.html')
-
-@app.route('/api/virtual-trading/wishlist', methods=['GET', 'POST', 'DELETE'])
-@login_required
-def wishlist():
-    try:
-        if request.method == 'GET':
-            wishlist = virtual_trading.get_wishlist(session['username'])
-            return jsonify({
-                'status': 'success',
-                'data': wishlist
-            })
-        
-        elif request.method == 'POST':
-            data = request.get_json()
-            success = virtual_trading.add_to_wishlist(
-                session['username'],
-                data['symbol'],
-                data['sector'],
-                data['company']
-            )
-            return jsonify({
-                'status': 'success' if success else 'error',
-                'message': 'Stock added to wishlist' if success else 'Stock already in wishlist'
-            })
-        
-        elif request.method == 'DELETE':
-            data = request.get_json()
-            virtual_trading.remove_from_wishlist(session['username'], data['symbol'])
-            return jsonify({
-                'status': 'success',
-                'message': 'Stock removed from wishlist'
-            })
-    except Exception as e:
-        logger.error(f"Error in wishlist route: {str(e)}")
-        logger.error(traceback.format_exc())
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
-
-@app.route('/api/virtual-trading/portfolio')
-@login_required
-def get_portfolio():
-    try:
-        portfolio = virtual_trading.get_portfolio(session['username'])
-        return jsonify({
-            'status': 'success',
-            'data': portfolio
-        })
-    except Exception as e:
-        logger.error(f"Error in get_portfolio route: {str(e)}")
-        logger.error(traceback.format_exc())
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
-
-@app.route('/api/virtual-trading/transactions')
-@login_required
-def get_transactions():
-    try:
-        transactions = virtual_trading.get_transaction_history(session['username'])
-        return jsonify({
-            'status': 'success',
-            'data': transactions
-        })
-    except Exception as e:
-        logger.error(f"Error in get_transactions route: {str(e)}")
-        logger.error(traceback.format_exc())
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
-
-@app.route('/api/virtual-trading/performance')
-@login_required
-def get_performance():
-    try:
-        performance = virtual_trading.get_portfolio_performance(session['username'])
-        return jsonify({
-            'status': 'success',
-            'data': performance
-        })
-    except Exception as e:
-        logger.error(f"Error in get_performance route: {str(e)}")
-        logger.error(traceback.format_exc())
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
-
-@app.route('/api/virtual-trading/trade', methods=['POST'])
-@login_required
-def execute_trade():
-    try:
-        data = request.get_json()
-        trade_type = data.get('type')
-        symbol = data.get('symbol')
-        quantity = int(data.get('quantity'))
-        # Always fetch the latest price from Alpha Vantage
-        ts = TimeSeries(key=ALPHA_VANTAGE_API_KEY, output_format='pandas')
-        try:
-            stock_data, meta = ts.get_daily(symbol=symbol, outputsize='compact')
-            if stock_data.empty:
-                return jsonify({'status': 'error', 'message': 'No price data available for this stock.'}), 400
-            latest_price = float(stock_data.iloc[-1]['4. close'])
-        except Exception as e:
-            return jsonify({'status': 'error', 'message': 'Alpha Vantage API error or limit reached.'}), 500
-        price = latest_price
-        if trade_type == 'buy':
-            success, message = virtual_trading.buy_stock(
-                session['username'],
-                symbol,
-                quantity,
-                price
-            )
-        elif trade_type == 'sell':
-            success, message = virtual_trading.sell_stock(
-                session['username'],
-                symbol,
-                quantity,
-                price
-            )
-        else:
-            return jsonify({
-                'status': 'error',
-                'message': 'Invalid trade type'
-            }), 400
-        return jsonify({
-            'status': 'success' if success else 'error',
-            'message': message
-        })
-    except Exception as e:
-        logger.error(f"Error in execute_trade route: {str(e)}")
-        logger.error(traceback.format_exc())
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
 
 @app.route('/virtual-trading')
 @login_required

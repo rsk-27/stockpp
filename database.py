@@ -12,57 +12,11 @@ client = MongoClient(MONGO_URI)
 db = client['stock_market_predictor']
 
 # Collections
-wishlist_collection = db['wishlist']
 trades_collection = db['trades']
 transactions_collection = db['transactions']
 portfolio_collection = db['portfolio']
 
 class Database:
-    @staticmethod
-    def add_to_wishlist(username, symbol, sector, company):
-        """Add a stock to user's wishlist"""
-        try:
-            result = wishlist_collection.update_one(
-                {'username': username, 'symbol': symbol},
-                {
-                    '$set': {
-                        'sector': sector,
-                        'company': company,
-                        'added_at': datetime.utcnow()
-                    }
-                },
-                upsert=True
-            )
-            return result.modified_count > 0 or result.upserted_id is not None
-        except Exception as e:
-            print(f"Error adding to wishlist: {e}")
-            return False
-
-    @staticmethod
-    def remove_from_wishlist(username, symbol):
-        """Remove a stock from user's wishlist"""
-        try:
-            result = wishlist_collection.delete_one({
-                'username': username,
-                'symbol': symbol
-            })
-            return result.deleted_count > 0
-        except Exception as e:
-            print(f"Error removing from wishlist: {e}")
-            return False
-
-    @staticmethod
-    def get_wishlist(username):
-        """Get user's wishlist"""
-        try:
-            return list(wishlist_collection.find(
-                {'username': username},
-                {'_id': 0}
-            ))
-        except Exception as e:
-            print(f"Error getting wishlist: {e}")
-            return []
-
     @staticmethod
     def execute_trade(username, trade_type, symbol, quantity, price):
         """Execute a trade (buy/sell)"""

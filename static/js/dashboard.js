@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const low52w = document.getElementById('low52w');
     const logoutBtn = document.getElementById('logoutBtn');
     const timeRangeSelect = document.getElementById('timeRangeSelect');
-    const addToWishlistBtn = document.getElementById('addToWishlist');
 
     let stockChart = null;
     let sectorsData = {};
@@ -236,9 +235,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 volume.textContent = stock.volume.toLocaleString();
                 high52w.textContent = stock.high_52w.toFixed(2);
                 low52w.textContent = stock.low_52w.toFixed(2);
-                renderChart(stock.historical_dates, stock.historical_prices, stock.predicted_price);
+                renderChart(stock.historical_dates, stock.historical_prices, stock.predicted_price, stock.regression_line);
                 currentStockData = stock;
-                addToWishlistBtn.style.display = 'block';
             })
             .catch(error => {
                 showChartLoading(false);
@@ -248,15 +246,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Render stock price chart using Chart.js (modern style)
-    function renderChart(dates, prices, predictedPrice) {
+    function renderChart(dates, prices, predictedPrice, regressionLine) {
         const ctx = stockChartCanvas.getContext('2d');
         let filteredDates = dates;
         let filteredPrices = prices;
+        let filteredRegression = regressionLine;
         // Filter data based on selectedPeriod
         if (selectedPeriod && selectedPeriod !== 'MAX') {
             const days = timeRanges[selectedPeriod] || 365;
             filteredDates = dates.slice(-days);
             filteredPrices = prices.slice(-days);
+            filteredRegression = regressionLine ? regressionLine.slice(-days) : null;
         }
         if (stockChart) {
             stockChart.destroy();
@@ -276,7 +276,17 @@ document.addEventListener('DOMContentLoaded', function () {
                         fill: true,
                         tension: 0.2,
                     },
-                    // Optionally, add predicted price as a dot
+                    filteredRegression ? {
+                        label: 'Regression Line',
+                        data: filteredRegression,
+                        borderColor: '#1976d2',
+                        borderWidth: 2,
+                        borderDash: [8, 6],
+                        pointRadius: 0,
+                        fill: false,
+                        tension: 0.2,
+                        order: 1,
+                    } : null,
                     predictedPrice !== undefined ? {
                         label: 'Predicted Price',
                         data: Array(filteredPrices.length - 1).fill(null).concat([predictedPrice]),
@@ -289,34 +299,18 @@ document.addEventListener('DOMContentLoaded', function () {
                         fill: false,
                         tension: 0,
                         showLine: false,
+                        order: 2,
                     } : null
                 ].filter(Boolean)
             },
             options: {
-                plugins: {
-                    legend: { display: false },
-                    title: {
-                        display: false
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { color: '#eee' },
-                        ticks: { color: '#333', font: { size: 14 } }
-                    },
-                    y: {
-                        grid: { color: '#eee' },
-                        ticks: { color: '#333', font: { size: 14 } }
-                    }
-                },
-                elements: {
-                    line: {
-                        borderJoinStyle: 'round',
-                        capBezierPoints: true
-                    }
-                },
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
             }
         });
     }
@@ -336,40 +330,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Logout button handler
     logoutBtn.addEventListener('click', () => {
         window.location.href = '/logout';
-    });
-
-    // Handle Add to Wishlist
-    addToWishlistBtn.addEventListener('click', function() {
-        if (!currentStockData) return;
-
-        const selectedSector = sectorSelect.value;
-        const selectedCompany = companySelect.value;
-        const selectedOption = companySelect.options[companySelect.selectedIndex];
-        const symbol = selectedOption.dataset.symbol;
-
-        fetch('/api/virtual-trading/wishlist', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                symbol: symbol,
-                sector: selectedSector,
-                company: selectedCompany
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                alert('Stock added to wishlist successfully!');
-            } else {
-                alert(data.message || 'Failed to add stock to wishlist');
-            }
-        })
-        .catch(error => {
-            console.error('Error adding to wishlist:', error);
-            alert('Error adding stock to wishlist');
-        });
     });
 
     // Add time range selector buttons to the page (if not already present)

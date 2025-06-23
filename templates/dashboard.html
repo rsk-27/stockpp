@@ -14,8 +14,8 @@
 <body>
     <nav class="navbar">
         <div class="nav-brand">
-            <i class="fas fa-chart-line"></i>
-            Stock Market Predictor
+            <i class="fa-solid fa-chart-line fa-lg"></i>
+            <a href="{{ url_for('dashboard') }}" style="text-decoration:none; color:inherit;"><span>Stock Market Predictor</span></a>
         </div>
         <div class="nav-links">
             <a href="{{ url_for('ipo_alert') }}" class="nav-link">
@@ -91,49 +91,45 @@
                         <h3>Next Day Prediction</h3>
                         <p id="predictedPriceNext">--</p>
                     </div>
-                    <div class="wishlist-action" style="margin-top: 1rem;">
-                        <button id="addToWishlist" class="action-btn watch-btn" style="display: none;">
-                            <i class="fas fa-star"></i> Add to Wishlist
-                        </button>
-                    </div>
                 </div>
                 
-                <div class="technical-indicators">
-                    <h3>Technical Indicators</h3>
-                    <div class="indicators-grid">
-                        <div class="indicator">
-                            <h4>RSI</h4>
-                            <p id="rsi">--</p>
-                        </div>
-                        <div class="indicator">
-                            <h4>SMA (5)</h4>
-                            <p id="sma5">--</p>
-                        </div>
-                        <div class="indicator">
-                            <h4>SMA (20)</h4>
-                            <p id="sma20">--</p>
-                        </div>
-                        <div class="indicator">
-                            <h4>SMA (50)</h4>
-                            <p id="sma50">--</p>
+                <div class="technical-market-row" style="display: flex; gap: 2rem; margin-top: 2rem;">
+                    <div class="technical-indicators" style="flex: 1; min-width: 200px;">
+                        <h3>Technical Indicators</h3>
+                        <div class="indicators-grid">
+                            <div class="indicator">
+                                <h4>RSI</h4>
+                                <p id="rsi">--</p>
+                            </div>
+                            <div class="indicator">
+                                <h4>SMA (5)</h4>
+                                <p id="sma5">--</p>
+                            </div>
+                            <div class="indicator">
+                                <h4>SMA (20)</h4>
+                                <p id="sma20">--</p>
+                            </div>
+                            <div class="indicator">
+                                <h4>SMA (50)</h4>
+                                <p id="sma50">--</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="market-stats">
-                    <h3>Market Statistics</h3>
-                    <div class="stats-grid">
-                        <div class="stat">
-                            <h4>Volume</h4>
-                            <p id="volume">--</p>
-                        </div>
-                        <div class="stat">
-                            <h4>52 Week High</h4>
-                            <p id="high52w">--</p>
-                        </div>
-                        <div class="stat">
-                            <h4>52 Week Low</h4>
-                            <p id="low52w">--</p>
+                    <div class="market-stats" style="flex: 1; min-width: 200px;">
+                        <h3>Market Statistics</h3>
+                        <div class="stats-grid">
+                            <div class="stat">
+                                <h4>Volume</h4>
+                                <p id="volume">--</p>
+                            </div>
+                            <div class="stat">
+                                <h4>52 Week High</h4>
+                                <p id="high52w">--</p>
+                            </div>
+                            <div class="stat">
+                                <h4>52 Week Low</h4>
+                                <p id="low52w">--</p>
+                            </div>
                         </div>
                     </div>
                 </div>

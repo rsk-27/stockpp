@@ -2,7 +2,6 @@ import json
 import os
 from datetime import datetime
 from typing import Dict, List, Optional
-import yfinance as yf
 from database import Database
 
 class VirtualTrading:
@@ -39,18 +38,6 @@ class VirtualTrading:
         file_path = self.get_user_data_path(username)
         with open(file_path, 'w') as f:
             json.dump(data, f, indent=4)
-
-    def add_to_wishlist(self, username: str, stock_symbol: str, sector: str, company: str):
-        """Add a stock to user's wishlist"""
-        return self.db.add_to_wishlist(username, stock_symbol, sector, company)
-
-    def remove_from_wishlist(self, username: str, stock_symbol: str):
-        """Remove a stock from user's wishlist"""
-        return self.db.remove_from_wishlist(username, stock_symbol)
-
-    def get_wishlist(self, username: str) -> List[Dict]:
-        """Get user's wishlist"""
-        return self.db.get_wishlist(username)
 
     def buy_stock(self, username: str, stock_symbol: str, quantity: int, price: float):
         """Buy stocks"""
